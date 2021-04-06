@@ -1,11 +1,7 @@
 <cfcomponent>
-
 	<cfsetting requesttimeout="10000">
-		
-		
-		
+
 	<cffunction name="getValidPlants" access="public" returntype="string" hint="returns a string of valid plants/plantids for this report">
-		
 		<cfquery name="getPlants" datasource="cfweb">
 			SELECT
 				Company,
@@ -20,31 +16,26 @@
 			ORDER BY 
 				Company_id ASC;
 		</cfquery>
-		
-		
+
 		<cfset validPlants = "">
 		<cfloop query="getPlants">
 			<cfset validPlants &= "#getPlants.Company_id#*#getPlants.Company#,">
 		</cfloop>
 		<cfset validPlants = Left(validPlants,Len(validPlants)-1)>
 			
-			
 		<cfreturn validPlants >
-		
 	</cffunction>
 		
 		
 		
 	<cffunction name="getTypeaheadData" access="remote" output="yes">
 		<cfargument name="ready" required="yes">
-			
 		<cftry>
-			
+
 		<cfset passFail = "pass">
 		<cfset reason = "">
 			
 		<cfif ready eq 1>
-			
 			<cftransaction>
 			<cfquery name="getCustomers" datasource="cfweb">
 				SELECT
@@ -61,7 +52,6 @@
 					csname asc
 			</cfquery>
 			</cftransaction>
-			
 <!---
 			<cftransaction>
 			<cfquery name="getGrades" datasource="Webview">
@@ -94,11 +84,9 @@
 				ORDER BY quote.routed_mach_no
 			</cfquery>
 --->
-			
 			<cfif getCustomers.recordcount>
 				<cfset customersList = ValueList(getCustomers.csname,'*')>
 			</cfif>
-						
 <!---
 			<cfif getGrades.recordcount>
 				<cfset gradesList = ValueList(getGrades.grade_cd,',')>
@@ -112,13 +100,10 @@
 				<cfset machinesList = ValueList(getMachines.newmachinename,'*')>
 			</cfif>
 --->
-						
 		<cfelse>
 			<cfset passFail = "fail">
 			<cfset reason = "page not ready">
 		</cfif>
-				
-				
 <!---		<cfset thisResult = '{"result":"#passFail#","reason":"#reason#","customer_list":"#customersList#","grade_list":"#gradesList#","style_list":"#stylesList#","machine_list":"#machinesList#"}'>--->
 			<cfset thisResult = '{"result":"#passFail#","reason":"#reason#","customer_list":"#customersList#"}'>
 		<cfoutput>#thisResult#</cfoutput>
@@ -130,9 +115,7 @@
 		</cfcatch>
 		</cftry>
 	</cffunction>
-		
-		
-				
+
 	<!--- SEARCH --->		
 	<cffunction name="doSearch" access="remote" output="yes">
 		<cfargument name="plant">
@@ -140,8 +123,7 @@
 		<cfargument name="startDate">
 		<cfargument name="endDate">
 		<cfargument name="emailCSV">
-			
-				
+
 		<cfset passFail = 'pass'>
 		<cfset reason = ''>
 		<cfset thisResult = '{'>
@@ -184,7 +166,6 @@
 				TripNo
 		</cfquery>
 		</cftransaction>
-			
 
 		<cfif getData.recordcount>
 			
@@ -193,36 +174,25 @@
 			<cfset totalShippedMSF = 0>
 				
 			<cfloop query="getData">
-				
 				<cfset theDriver = getData.driver>
 				<cfif getData.driver eq "">
 					<cfset theDriver = "<i>( driver unassigned from trip )</i>">
 				</cfif>
-				
-				
+
 				<cfif arguments.driver eq "all">
-						
 					<cfset tableString = tableString & "<tr class='appendedRow' height='40px'><td class='bBorder' width='16.33%' data-sort='" & DateTimeFormat(getData.dlv_date,"yyyymmddHHnnss") & "'><div align='right'>" & DateFormat(getData.dlv_date,"mm/dd/yyyy") & "</div></td><td class='bBorder' width='16.33%'><div align='right' class='mainCol'>" & getData.plant & "</div></td><td class='bBorder' width='16.33%'><div align='right'>" & UCASE(theDriver) & "</div></td><td class='bBorder' width='16.33%'><div align='right'>" & getData.CARRIER_TRUCK_CD & "</div></td><td class='bBorder' width='16.33%'><div align='center'>" & getData.tripno & "</div></td><td class='bBorder' width='16.33%'><div align='left'>" & lsNumberFormat(getData.MSF_CFLUTE_EQUIV,".999") & "</div></td></tr>">
-					
 				<cfelse>
-					
 					<cfset tableString = tableString & "<tr class='appendedRow' height='40px'><td class='bBorder' width='16.33%' data-sort='" & DateTimeFormat(getData.dlv_date,"yyyymmddHHnnss") & "'><div align='right'>" & DateFormat(getData.dlv_date,"mm/dd/yyyy") & "</div></td><td class='bBorder' width='16.33%'><div align='right'>" & getData.plant & "</div></td><td class='bBorder' width='16.33%'><div align='right' class='mainCol'>" & UCASE(theDriver) & "</div></td><td class='bBorder' width='16.33%'><div align='right'>" & getData.CARRIER_TRUCK_CD & "</div></td><td class='bBorder' width='16.33%'><div align='center'>" & getData.tripno & "</div></td><td class='bBorder' width='16.33%'><div align='left'>" & lsNumberFormat(getData.MSF_CFLUTE_EQUIV,".999") & "</div></td></tr>">
-					
 				</cfif>
-				
-				
-					
+
 				<cfset totalTrips += 1>
 				<cfset totalShippedMSF += getData.MSF_CFLUTE_EQUIV>
-
 			</cfloop>
 					
 			<cfset totalShippedMSF = lsNumberFormat(totalShippedMSF,".999")>
 					
-					
 			<cfif emailCSV eq 1>				
 				<cfset csvEmailed = createCSV(arguments.plant,arguments.startDate,arguments.endDate)>
-					
 				<cfif csvEmailed.passFail eq 'pass'>
 					<cfset emailSent = 'true'>
 				<cfelse>
@@ -237,8 +207,7 @@
 					</cfmail>
 				</cfif>
 			</cfif>
-				
-					
+
 		<cfelse>
 			<cfset tableString = "">
 			<cfset totalTrips = 0>
@@ -246,23 +215,18 @@
 			<cfset passFail = "fail">
 			<cfset reason = "No records found.">		
 		</cfif>
-				
-
-				
 		
 		<cfset thisResult = thisResult & '"result":"#passFail#","reason":"#reason#","plant":"#arguments.plant#","start_date":"#arguments.startDate#","end_date":"#arguments.endDate#","driver":"#arguments.driver#","total_trips":"#totalTrips#","total_shipped_msf":"#totalShippedMSF#","tableString":"#tableString#"}'>
 			
 <!---
 		<cfset thisResult = '{"result":"#passFail#","reason":"#reason#","search_type":"#SearchType#","table_no":"#arguments.TableNo#","warehouse_no":"#WarehouseNo#","company_no":"#CompanyNo#","sort":"#arguments.sort#","sort_option":"#arguments.SortOption#","total_rows":#totalRows#,"desired_rows":#arguments.desiredRowsFirstLoad#,"current_rows":#arguments.currentRows#,"tableString":"#tableString#"}'>
 --->
-			
-			
+
 <!---
 		<cfmail to="dev@tomfafard.com" from="dev@tomfafard.com" subject="Someone used the report!" type="HTML">
 			<cfdump var="#thisResult#">
 		</cfmail>
 --->
-
 		<cfoutput>#thisResult#</cfoutput>
 			
 		<cfcatch>
@@ -271,25 +235,20 @@
 			</cfmail>
 		</cfcatch>
 		</cftry>
-
 	</cffunction>	
-				
-				
-				
+
 	<cffunction name="getChartData" access="remote" output="yes">
 		<cfargument name="plant">
 		<cfargument name="startDate">
 		<cfargument name="endDate">
 		<cfargument name="chartType">
-			
-				
+
 		<cfset passFail = 'pass'>
 		<cfset reason = ''>
 		<cfset thisResult = '{'>
 			
 		<cftry>
-			
-			
+
 		<cftransaction isolation="READ_UNCOMMITTED">
 		<cfswitch expression="#arguments.chartType#">
 			
@@ -330,9 +289,7 @@
 				<cfset yDataFormat = ".99">
 				<cfset chartName = "MSF Shipped: By Driver">
 			</cfcase>
-				
-							
-			
+
 			<cfcase value="DrivNumberTrips">
 				<cfquery name="getData" datasource="cfweb">
 					SELECT
@@ -370,9 +327,7 @@
 				<cfset yDataFormat = ",">
 				<cfset chartName = "Number Trips: By Driver">
 			</cfcase>
-							
-							
-			
+
 			<cfcase value="DrivStops">
 				<cfquery name="getData" datasource="cfweb">
 					SELECT
@@ -410,9 +365,7 @@
 				<cfset yDataFormat = ",">
 				<cfset chartName = "Number Stops: By Driver">
 			</cfcase>
-							
-							
-							
+
 			<cfcase value="DrivAvgMSFTrip">
 				<cfquery name="getData" datasource="cfweb">
 					select a.Plant, a.x_data, AVG(a.y_data) as y_data from (
@@ -492,8 +445,7 @@
 				<cfset yDataFormat = ".99">
 				<cfset chartName = "MSF Shipped (Daily): By Driver">
 			</cfcase>
-					
-					
+
 			<cfcase value="DrivNumberTripsPerDay">
 				<cfquery name="getData" datasource="cfweb">
 					SELECT
@@ -615,14 +567,7 @@
 				<cfset chartName = "Number Trips: By Customer">
 			</cfcase>	
 			--->
-					
-					
-					
-					
-					
-				
-					
-			
+
 			<cfcase value="DateAvgMSFDriver">
 				<cfquery name="getData" datasource="cfweb">
 				SELECT
@@ -649,9 +594,7 @@
 				<cfset yDataFormat = ".99">
 				<cfset chartName = "Avg MSF/Driver: By Date">
 			</cfcase>
-					
-					
-					
+
 			<cfcase value="DateAvgMSFTrip">
 				<cfquery name="getData" datasource="cfweb">
 				SELECT
@@ -678,9 +621,7 @@
 				<cfset yDataFormat = ".99">
 				<cfset chartName = "Avg MSF/Trip: By Date">
 			</cfcase>
-					
-					
-				
+
 			<cfcase value="DateAvgMilesDriver">
 				<cfquery name="getData" datasource="cfweb">
 				SELECT
@@ -708,9 +649,7 @@
 				<cfset yDataFormat = ".99">
 				<cfset chartName = "Avg Miles/Driver: By Date">
 			</cfcase>
-					
-					
-					
+
 			<cfcase value="DateAvgTripDriver">
 				<cfquery name="getData" datasource="cfweb">
 				SELECT
@@ -737,22 +676,13 @@
 				<cfset yDataFormat = ".99">
 				<cfset chartName = "Avg Trip/Driver: By Date">
 			</cfcase>
-					
-
-			
 		</cfswitch>
 		</cftransaction>
-			
 
 		<cfif getData.recordcount>
-			
-			
 			<cfset dataObj = '[{"name":"#getData.Plant#", "data":['>
 			<cfset xArr = '['>
-			
 			<cfif arguments.plant eq 'all' AND (LEFT(arguments.chartType,4) eq 'Date')>
-				
-				
 				<cfset lastPlant = getData.Plant>
 				<cfset collectXFlag = 1>
 				<cfloop query="getData">
@@ -761,7 +691,6 @@
 						<cfif collectXFlag eq 1>
 							<cfset xArr &= '"#getData.x_data#"]'>
 						</cfif>
-							
 					<cfelseif getData.Plant neq lastPlant>
 						<cfset dataObj = Left(dataObj,Len(dataObj)-1)>
 						<cfset dataObj &= ']},{"name":"#getData.Plant#", "data":[#lsNumberFormat(getData.y_data,yDataFormat)#,'>
@@ -770,25 +699,16 @@
 							<cfset xArr &= ']'>
 							<cfset collectXFlag = 0>
 						</cfif>
-							
 					<cfelse>
 						<cfset dataObj &= '#lsNumberFormat(getData.y_data,yDataFormat)#,'>
 						<cfif collectXFlag eq 1>
 							<cfset xArr &= '"#getData.x_data#",'>
 						</cfif>
-						
 					</cfif>
-							
 					<cfset lastPlant = getData.Plant>
 				</cfloop>
-				
-					
 			<cfelse>
-				
-				
 				<cfset dataObj = '[{"name":"#yDataName#", "data":['>
-				
-				
 				<cfloop query="getData">
 					<cfif getData.currentrow eq getData.recordcount>
 						<cfset dataObj &= '#lsNumberFormat(getData.y_data,yDataFormat)#]}]'>
@@ -798,17 +718,14 @@
 						<cfset xArr &= '"#getData.x_data#",'>
 					</cfif>
 				</cfloop>
-				
 			</cfif>
-							
-			
+
 			<cfif arguments.plant eq 'all'>
 				<cfset thisPlant = 'All Plants'>
 			<cfelse>
 				<cfset thisPlant = getData.plant>
 			</cfif>
-			
-					
+
 		<cfelse>
 			<cfset dataObj = "">
 			<cfset thisPlant = "">
@@ -816,13 +733,8 @@
 			<cfset passFail = "fail">
 			<cfset reason = "No records found.">		
 		</cfif>
-				
-				
-		
+
 		<cfset thisResult = thisResult & '"result":"#passFail#","reason":"#reason#","this_plant":"#thisPlant#","chart_name":"#chartName#","x_arr":#xArr#,"data_obj":#dataObj#}'>
-			
-
-
 		<cfoutput>#thisResult#</cfoutput>
 			
 		<cfcatch>
@@ -831,31 +743,19 @@
 			</cfmail>
 		</cfcatch>
 		</cftry>
-
 	</cffunction>				
-				
-	
-			
-				
-				
-				
-				
-				
+
 	<!--- CREATE CSV: called internally from doSearch --->	
 	<cffunction name="createCSV" access="private" output="yes">
 		<cfargument name="plant" required="yes">
 		<cfargument name="startDate" required="yes">
 		<cfargument name="endDate" required="yes">
 
-			
 		<cfset result = StructNew()>
 		<cfset result['passFail'] = 'pass'>
 		<cfset result['reason'] = ''>
 			
 		<cftry>
-			
-			
-		
 		<cftransaction isolation="READ_UNCOMMITTED">
 		<cfquery name="getCSVData" datasource="iDelivery">
 			SELECT
@@ -878,11 +778,9 @@
 				driver
 		</cfquery>
 		</cftransaction>
-			
 				
 		<cfset csvfile = "DlvDate,Plant,Driver,TripNo,Trailer,MSF_CFLUTE_EQUIV" & chr(13)>
-			
-					
+
 		<cfif getDriverUtilData.recordcount>
 			<cfloop query="getDriverUtilData">
 				<cfset csvrow = 
@@ -900,26 +798,14 @@
 			<cfset result['passFail'] = 'fail'>
 			<cfset result['reason'] = 'No records found...'>
 		</cfif>
-				
-		
-		
-			
-		
-		<cfset CSVFileName =  'IDRDriverUtil_#DateFormat(arguments.startDate,"mm-dd-yyyy")#__#DateFormat(arguments.endDate,"mm-dd-yyyy")#.csv' > 
 
+		<cfset CSVFileName =  'IDRDriverUtil_#DateFormat(arguments.startDate,"mm-dd-yyyy")#__#DateFormat(arguments.endDate,"mm-dd-yyyy")#.csv' >
 		<cfset messageSubject =  'IDR Driver Utilization CSV: #DateFormat(arguments.startDate,"mm/dd/yyyy")# - #DateFormat(arguments.endDate,"mm/dd/yyyy")#' >
-
-				
-		
-		<cfset CSVFileName =  'IDRDriverUtil_#DateFormat(arguments.startDate,"mm-dd-yyyy")#__#DateFormat(arguments.endDate,"mm-dd-yyyy")#.csv' > 
-
+		<cfset CSVFileName =  'IDRDriverUtil_#DateFormat(arguments.startDate,"mm-dd-yyyy")#__#DateFormat(arguments.endDate,"mm-dd-yyyy")#.csv' >
 		<cfset CSVFileName =  GetDirectoryFromPath(ExpandPath("*.*")) & 'Files\' & CSVFileName> 
 		<cffile action="write" file="#CSVFileName#" output="#csvfile#" addnewline="yes" nameconflict="overwrite">
-		
-		   
-		
+
 		<cfif fileexists(CSVFileName)>
-		
 		    <cfmail to="dev@tomfafard.com" bcc="dev@tomfafard.com" from="webservices@carolinacontainer.com" subject="#messageSubject#" >
 			<cfmailparam file="#CSVFileName#">
 			To Open this file: 
@@ -931,30 +817,20 @@
 
 			Please do not reply to this automated email.
 			</cfmail>
-
 		</cfif>       
-			
-		
+
 		<cfreturn result>
-		
-			
 		<cfcatch>
 			<cfmail to="dev@tomfafard.com" from="dev@tomfafard.com" subject="ERROR:Driver Util CSV" type="HTML">
 				<cfdump var="#cfcatch#">
 			</cfmail>
 		</cfcatch>
 		</cftry>
-			
 	</cffunction>
-
-			
-		
 
 	<cffunction name="GetDateByWeek" access="private" returntype="date" output="false">
 		<cfargument name="Year" type="numeric" required="true">
 		<cfargument name="Week" type="numeric" required="true">
-
-
 		<!---
 			Get the first day of the year. This one is
 			easy, we know it will always be January 1st
@@ -976,8 +852,6 @@
 			going to be seven days.
 		--->
 		<cfset FirstDayOfWeek = ( FirstDayOfCalendarYear + ( (arguments.Week - 1) * 7 ) )>
-
-
 		<!---
 			Return the first day of the week for the
 			given year/week combination. Make sure to
@@ -987,6 +861,5 @@
 		--->
 		<cfreturn DateFormat(FirstDayOfWeek, "yyyy-mm-dd")>
 	</cffunction>
-				
-								
+	
 </cfcomponent>
